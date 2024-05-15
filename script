@@ -1,0 +1,49 @@
+Timer.instance().clear()
+let block = Vars.content.block('deep-water')
+Timer.schedule(() => {
+  try{
+    if(!me.unit().plans.empty) return
+      Geometry.circle(Math.floor(me.x / 8), Math.floor(me.y / 8), 23, (x, y) => {
+      
+        const tile = Vars.world.tile(x, y)
+        if(tile.floor() != block) return;
+        if(verify(x, y) == false) return;
+        if(verify2(tile) == false) return;
+        if(tile.build != null) return;
+        const plan = new BuildPlan(x, y, 0, Blocks.mechanicalPump)
+        me.unit().plans.add(plan)
+      })
+    }
+    catch(e){
+      Log.info(e)
+    }
+  }, 0, 0.3)
+
+Timer.schedule(() => {
+  me.unit().plans.clear()
+}, 0, 300)
+
+function verify(x, y){
+  let returnVal = false
+  let arr = [
+    new Vec2(x + 1, y),
+    new Vec2(x - 1, y),
+    new Vec2(x, y + 1),
+    new Vec2(x, y - 1)
+  ]
+  arr.forEach(e => {
+    const tile = Vars.world.tile(e.x, e.y)
+    if(tile.floor() != block) returnVal = true
+  })
+  return returnVal
+}
+
+function verify2(tile){
+  let returnVal = true
+  Groups.unit.each(u => {
+    if(u.tileOn() == tile){
+      returnVal=false
+    }
+  })
+  return returnVal
+}
